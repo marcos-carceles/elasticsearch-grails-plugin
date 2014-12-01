@@ -16,7 +16,7 @@
 package org.grails.plugins.elasticsearch.mapping
 
 import grails.util.GrailsNameUtils
-import grails.util.Holders
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsClassUtils
 import org.codehaus.groovy.grails.commons.GrailsDomainClass
 import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty
@@ -27,6 +27,8 @@ import org.springframework.util.ClassUtils
  * Build ElasticSearch class mapping based on attributes provided by closure.
  */
 class ElasticSearchMappingFactory {
+
+    private GrailsApplication grailsApplication
 
     private static final Set<String> SUPPORTED_FORMAT =
             ['string', 'integer', 'long', 'float', 'double', 'boolean', 'null', 'date']
@@ -43,7 +45,7 @@ class ElasticSearchMappingFactory {
         }
     }
 
-    static Map<String, Object> getElasticMapping(SearchableClassMapping scm) {
+    public Map<String, Object> getElasticMapping(SearchableClassMapping scm) {
         Map mappingFields = [properties: getMappingProperties(scm)]
 
         SearchableClassPropertyMapping parentProperty = scm.propertiesMapping.find { it.parent }
@@ -56,7 +58,7 @@ class ElasticSearchMappingFactory {
         mapping
     }
 
-    private static Map<String, Object> getMappingProperties(SearchableClassMapping scm) {
+    private  Map<String, Object> getMappingProperties(SearchableClassMapping scm) {
         Map<String, Object> elasticTypeMappingProperties = [:]
 
         if (!scm.isAll()) {
@@ -172,12 +174,12 @@ class ElasticSearchMappingFactory {
         elasticTypeMappingProperties
     }
 
-    private static boolean idTypeIsMongoObjectId(String idType) {
+    private boolean idTypeIsMongoObjectId(String idType) {
         idType.equals('objectId')
     }
 
-    private static String treatValueAsAString(String idType) {
-        def pluginManager = Holders.applicationContext.getBean(GrailsPluginManager.BEAN_NAME)
+    private String treatValueAsAString(String idType) {
+        def pluginManager = grailsApplication.parentContext.getBean(GrailsPluginManager.BEAN_NAME)
 
         if (((GrailsPluginManager) pluginManager).hasGrailsPlugin('mongodb')) {
             return 'string'
@@ -185,15 +187,19 @@ class ElasticSearchMappingFactory {
         idType
     }
 
-    private static boolean isDateType(Class type) {
+    private boolean isDateType(Class type) {
         (JODA_TIME_BASE != null && JODA_TIME_BASE.isAssignableFrom(type)) || Date.isAssignableFrom(type)
     }
 
-    private static boolean isBigDecimalType(Class type) {
+    private boolean isBigDecimalType(Class type) {
         BigDecimal.isAssignableFrom(type)
     }
 
-    private static Map<String, Object> defaultDescriptor(String type, String index, boolean excludeFromAll) {
+    private Map<String, Object> defaultDescriptor(String type, String index, boolean excludeFromAll) {
         [type: type, index: index, include_in_all: !excludeFromAll]
+    }
+
+    void setGrailsApplication(GrailsApplication grailsApplication) {
+        this.grailsApplication = grailsApplication
     }
 }

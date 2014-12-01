@@ -25,6 +25,7 @@ import org.grails.plugins.elasticsearch.conversion.CustomEditorRegistrar
 import org.grails.plugins.elasticsearch.conversion.JSONDomainFactory
 import org.grails.plugins.elasticsearch.conversion.unmarshall.DomainClassUnmarshaller
 import org.grails.plugins.elasticsearch.index.IndexRequestQueue
+import org.grails.plugins.elasticsearch.mapping.ElasticSearchMappingFactory
 import org.grails.plugins.elasticsearch.mapping.SearchableClassMappingConfigurator
 import org.grails.plugins.elasticsearch.unwrap.DomainClassUnWrapperChain
 import org.grails.plugins.elasticsearch.unwrap.HibernateProxyUnWrapper
@@ -87,10 +88,14 @@ class ElasticsearchGrailsPlugin {
             elasticSearchClient = ref('elasticSearchClient')
             jsonDomainFactory = ref('jsonDomainFactory')
         }
+        elasticSearchMappingFactory(ElasticSearchMappingFactory) {
+            grailsApplication = ref('grailsApplication')
+        }
         searchableClassMappingConfigurator(SearchableClassMappingConfigurator) { bean ->
             elasticSearchContext = ref('elasticSearchContextHolder')
             grailsApplication = ref('grailsApplication')
             elasticSearchClient = ref('elasticSearchClient')
+            elasticSearchMappingFactory = ref('elasticSearchMappingFactory')
             config = esConfig
 
             bean.initMethod = 'configureAndInstallMappings'

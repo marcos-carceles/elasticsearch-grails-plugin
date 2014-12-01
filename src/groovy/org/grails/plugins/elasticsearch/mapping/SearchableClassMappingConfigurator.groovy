@@ -41,6 +41,7 @@ class SearchableClassMappingConfigurator {
     private ElasticSearchContextHolder elasticSearchContext
     private GrailsApplication grailsApplication
     private Client elasticSearchClient
+    private ElasticSearchMappingFactory elasticSearchMappingFactory
     private ConfigObject config
 
     /**
@@ -105,7 +106,7 @@ class SearchableClassMappingConfigurator {
         LOG.debug("Installing mappings...")
         for (SearchableClassMapping scm : mappings) {
             if (scm.isRoot()) {
-                Map elasticMapping = ElasticSearchMappingFactory.getElasticMapping(scm)
+                Map elasticMapping = elasticSearchMappingFactory.getElasticMapping(scm)
 
                 // todo wait for success, maybe retry.
                 // If the index does not exist, create it
@@ -165,6 +166,10 @@ class SearchableClassMappingConfigurator {
 
     void setElasticSearchClient(Client elasticSearchClient) {
         this.elasticSearchClient = elasticSearchClient
+    }
+
+    void setElasticSearchMappingFactory(ElasticSearchMappingFactory elasticSearchMappingFactory) {
+        this.elasticSearchMappingFactory = elasticSearchMappingFactory
     }
 
     void setConfig(ConfigObject config) {
