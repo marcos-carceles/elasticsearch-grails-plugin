@@ -38,7 +38,7 @@ class SearchableDomainClassMapperSpec extends Specification {
         def clazz = new DefaultGrailsDomainClass(Building)
         SearchableDomainClassMapper mapper = new SearchableDomainClassMapper(grailsApplication, clazz, config)
         def classMapping = mapper.buildClassMapping()
-        def mapping = ElasticSearchMappingFactory.getElasticMapping(classMapping)
+        def mapping = new ElasticSearchMappingFactory().getElasticMapping(classMapping)
         mapping == [
                 building: [
                         properties: [
