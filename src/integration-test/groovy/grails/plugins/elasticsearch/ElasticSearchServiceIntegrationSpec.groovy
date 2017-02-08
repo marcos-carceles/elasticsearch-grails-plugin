@@ -513,13 +513,16 @@ class ElasticSearchServiceIntegrationSpec extends Specification {
         result.searchResults*.name == ['Großer Kasten']
     }
 
+    private static final ALL_POSTCODES = ['81667', '85774', '87700']
+
     void 'a geo distance search finds geo points at varying distances'() {
 
-        given:
-        def buildings = Building.list()
-        buildings.each {
-            it.delete()
-        }
+        // @marcoscarceles Why delete the Buildings? This was removing them from ES too, so they weren't found
+//        given:
+//        def buildings = Building.list()
+//        buildings.each {
+//            it.delete()
+//        }
 
         when: 'a geo distance search is performed'
         Map params = [indices: Building, types: Building]
@@ -537,8 +540,10 @@ class ElasticSearchServiceIntegrationSpec extends Specification {
         then: 'all geo points in the search radius are found'
         List<Building> searchResults = result.searchResults
 
-        (postalCodesFound.empty && searchResults.empty) || searchResults.each { searchResult ->
-            searchResult.name in postalCodesFound
+        (postalCodesFound.empty && searchResults.empty) || searchResults.findAll {
+            it.name in ALL_POSTCODES // Filter out Buildings from other tests
+        }.every { searchResult ->
+            searchResult.name in postalCodesFound //No other unexpected Post Code
         }
 
         where:
@@ -546,7 +551,7 @@ class ElasticSearchServiceIntegrationSpec extends Specification {
         '1km'     | []
         '5km'     | ['81667']
         '20km'    | ['81667', '85774']
-        '1000km'  | ['81667', '85774', '87700']
+        '1000km'  | ALL_POSTCODES
     }
 
     void 'A search with lowercase Characters should return appropriate results'() {

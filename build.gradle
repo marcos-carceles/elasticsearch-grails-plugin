@@ -19,7 +19,7 @@ plugins {
     id 'com.jfrog.artifactory' version '4.0.0'
 }
 
-version "1.2.1"
+version "2.0.0"
 group "org.grails.plugins"
 
 apply plugin: 'maven-publish'
@@ -68,6 +68,15 @@ sourcesJar {
 
 def elasticsearchVersion = '2.3.3'
 
+//TODO: Gorm 6.0.6 issue https://github.com/grails/grails-core/issues/10448 prevents integration tests from running. Remove once it's resolved
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        if(details.requested.group == 'org.grails' && details.requested.name.startsWith('grails-datastore')) {
+            details.useVersion("6.0.7.BUILD-SNAPSHOT")
+        }
+    }
+}
+
 dependencies {
     provided 'org.springframework.boot:spring-boot-starter-logging'
     provided "org.springframework.boot:spring-boot-starter-actuator"
@@ -115,7 +124,3 @@ task cleanDataDir(type: Delete) {
 apply from: "gradle/documentation.gradle"
 
 apply from: "gradle/publish.gradle"
-
-
-
-
